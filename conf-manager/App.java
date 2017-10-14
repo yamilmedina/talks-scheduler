@@ -10,17 +10,20 @@ import java.util.stream.Stream;
 
 public class App {
 
+    final static String VALID_INPUT = "^[^0-9^\\n]+(?:[0-9]*min|lightning)$";
     final static String TITLE = "((\\d)+min*|lightning)";
     final static String TIME = "^([^0-9^\\n]*)(?=([0-9]+min|lightning)$)";
 
     public static void main(String[] args) {
         String workingDir = System.getProperty("user.dir");
         try (Stream<String> stream = Files.lines(Paths.get(workingDir + File.separator + args[0]))) {
-            stream.map(l -> {
-                String title = l.split(TITLE)[0];
-                String time = l.split(TIME)[1];
-                return new Talk(title, time);
-            }).forEach(l -> System.out.println(l));
+            stream.filter(l -> l.matches(VALID_INPUT))
+                    .map(l -> {
+                        String title = l.split(TITLE)[0];
+                        String time = l.split(TIME)[1];
+                        int minutes = "lightning".equalsIgnoreCase(time.trim()) ? 5 : Integer.parseInt(time.replaceAll("min", ""));
+                        return new Talk(title, minutes);
+                    }).forEach(l -> System.out.println(l));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,13 +86,13 @@ public class App {
     static class Talk {
 
         private String name;
-        private String durationMinutes;
+        private int durationMinutes;
         private Date startDate;
 
         public Talk() {
         }
 
-        public Talk(String name, String durationMinutes) {
+        public Talk(String name, int durationMinutes) {
             this.name = name;
             this.durationMinutes = durationMinutes;
         }
@@ -102,11 +105,11 @@ public class App {
             this.name = name;
         }
 
-        public String getDurationMinutes() {
+        public int getDurationMinutes() {
             return durationMinutes;
         }
 
-        public void setDurationMinutes(String durationMinutes) {
+        public void setDurationMinutes(int durationMinutes) {
             this.durationMinutes = durationMinutes;
         }
 
