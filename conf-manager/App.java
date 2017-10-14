@@ -1,11 +1,22 @@
 
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class App {
 
     public static void main(String[] args) {
-        // split input into map/data-structure(s)
-        // build timeline
+        String workingDir = System.getProperty("user.dir");
+        try (Stream<String> stream = Files.lines(Paths.get(workingDir + File.separator + args[0]))) {
+            stream.forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     class Session {
@@ -47,6 +58,7 @@ public class App {
     }
 
     enum MOMENT {
+
         MORNING(180),
         AFTERNOON(240);
         private final int totalMinutes;
