@@ -10,16 +10,23 @@ import java.util.stream.Stream;
 
 public class App {
 
+    final static String TITLE = "((\\d)+min*|lightning)";
+    final static String TIME = "^([^0-9^\\n]*)(?=([0-9]+min|lightning)$)";
+
     public static void main(String[] args) {
         String workingDir = System.getProperty("user.dir");
         try (Stream<String> stream = Files.lines(Paths.get(workingDir + File.separator + args[0]))) {
-            stream.forEach(System.out::println);
+            stream.map(l -> {
+                String title = l.split(TITLE)[0];
+                String time = l.split(TIME)[1];
+                return new Talk(title, time);
+            }).forEach(l -> System.out.println(l));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    class Session {
+    static class Session {
 
         private MOMENT moment;
         private final int maxDurationMinutes;
@@ -73,11 +80,19 @@ public class App {
 
     };
 
-    class Talk {
+    static class Talk {
 
         private String name;
-        private int durationMinutes;
+        private String durationMinutes;
         private Date startDate;
+
+        public Talk() {
+        }
+
+        public Talk(String name, String durationMinutes) {
+            this.name = name;
+            this.durationMinutes = durationMinutes;
+        }
 
         public String getName() {
             return name;
@@ -87,11 +102,11 @@ public class App {
             this.name = name;
         }
 
-        public int getDurationMinutes() {
+        public String getDurationMinutes() {
             return durationMinutes;
         }
 
-        public void setDurationMinutes(int durationMinutes) {
+        public void setDurationMinutes(String durationMinutes) {
             this.durationMinutes = durationMinutes;
         }
 
@@ -101,6 +116,11 @@ public class App {
 
         public void setStartDate(Date startDate) {
             this.startDate = startDate;
+        }
+
+        @Override
+        public String toString() {
+            return "TALK[name=" + name + ";duration=" + durationMinutes + "]";
         }
 
     }
