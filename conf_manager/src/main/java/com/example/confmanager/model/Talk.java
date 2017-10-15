@@ -4,11 +4,22 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+/**
+ * Representacion de un tema de la conferencia.
+ *
+ * @author yamil
+ */
 public class Talk {
 
+    /**
+     * Pseudo tema, representacion de actividad de almuerzo.
+     */
     public final static Talk LUNCH = new Talk("Lunch", 60, LocalTime.of(12, 0));
+    /**
+     * Pseudo tema, representacion de actividad social.
+     */
     public final static Talk NETWORKING_EVENT = new Talk("Networking Event", 60, LocalTime.of(17, 0));
-    
+
     private String name;
     private Moment moment;
     private LocalTime startTime;

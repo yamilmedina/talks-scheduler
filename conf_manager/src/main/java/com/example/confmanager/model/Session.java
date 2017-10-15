@@ -4,6 +4,12 @@ import java.time.LocalTime;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * Representacion de una tematica de la conferencia, la cual contiene una lista
+ * de temas separadas segun la jornada que le corresponda AM/PM.
+ *
+ * @author yamil
+ */
 public class Session {
 
     private String theme;
@@ -44,6 +50,14 @@ public class Session {
         return orderedTalks;
     }
 
+    /**
+     * Permite agregar un tema a la lista, realizando validacion de no
+     * "overlaping" de tema y con las restricciones dadas de almuerzo 12 hrs y
+     * evento social 17 hrs.
+     *
+     * @param talk
+     * @return
+     */
     public boolean addTalk(Talk talk) {
         boolean added = false;
         if (talk != null && talk.getStartTime() != null) {
