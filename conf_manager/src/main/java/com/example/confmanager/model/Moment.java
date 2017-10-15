@@ -1,5 +1,10 @@
 package com.example.confmanager.model;
 
+/**
+ * Representacion de Jornada AM/PM
+ *
+ * @author yamil
+ */
 public enum Moment {
 
     MORNING(180),
