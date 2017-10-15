@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -53,6 +54,8 @@ public class App {
                     session2.addTalk(t);
                 }
             }
+            session1.addTalk(Talk.NETWORKING_EVENT);
+            session2.addTalk(Talk.NETWORKING_EVENT);
         }
 
         public void print() {
@@ -106,6 +109,11 @@ public class App {
 
         public boolean addTalk(Talk talk) {
             boolean added = false;
+            if (talk != null && talk.getStartTime() != null) {
+                orderedTalks.add(talk);
+                return true;
+            }
+
             if (talk != null) {
                 if (orderedTalks.isEmpty()) {
                     talk.setStartTime(LocalTime.of(9, 0));
@@ -211,8 +219,43 @@ public class App {
         }
 
         @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Talk other = (Talk) obj;
+            return Objects.equals(this.durationMinutes, other.durationMinutes)
+                    && Objects.equals(this.moment, other.moment)
+                    && Objects.equals(this.name, other.name)
+                    && Objects.equals(this.startTime, other.startTime);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.durationMinutes, this.moment, this.name, this.startTime);
+        }
+
+        @Override
         public String toString() {
-            return startTime.format(DateTimeFormatter.ofPattern("HH:mma")) + " " + name + " " + durationMinutes + "min";
+            StringBuilder sb = new StringBuilder("");
+            if (startTime != null) {
+                sb.append(startTime.format(DateTimeFormatter.ofPattern("HH:mma")));
+            }
+            if (name != null) {
+                sb.append(" ");
+                sb.append(name);
+            }
+            if (durationMinutes == 5) {
+                sb.append(" lightning");
+            } else if (!LUNCH.equals(this) && !NETWORKING_EVENT.equals(this)) {
+                sb.append(" ");
+                sb.append(durationMinutes);
+                sb.append("min");
+            }
+            return sb.toString();
         }
 
     }
