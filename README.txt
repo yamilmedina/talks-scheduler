@@ -18,5 +18,10 @@ De preferencia usar 1, ya que este se encuentra estructurado en paquetes y se ag
 	EJ: "java App in.txt"			(ejemplo de ejecucion con in.txt como archivo de entrada, ubicado en dirbase:conf-manager-se)
  
 
-### Suposiciones ###
+### Explicaciones y Suposiciones ###
 - Se asume que la entrada contiene el total de charlas a calendarizar (no sobran).
+- Para calendarizar se utilizó el apoyo de la API collections de java, específicamente en SortedSet, ya que facilita la inserción ordenada y por lo mismo se pueden ir agregando "charlas" con su tiempo de inicio definido.
+- Se utilizó java 8 por lo que también se hacer uso de la nueva API de tiempo (LocalTime).
+- Se filtró la entrada mediante expresiones regulares.
+- Se podría haber agregado más tests unitarios, pero creo que se probaron las piezas mas importantes.
+
