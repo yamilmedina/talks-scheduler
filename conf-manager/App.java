@@ -5,8 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,13 +20,13 @@ public class App {
     public static void main(String[] args) {
         String workingDir = System.getProperty("user.dir");
         try (Stream<String> stream = Files.lines(Paths.get(workingDir + File.separator + args[0]))) {
-            LinkedList<Talk> talksPool = stream.filter(l -> l.matches(VALID_INPUT))
+            List<Talk> talksPool = stream.filter(l -> l.matches(VALID_INPUT))
                     .map(l -> {
                         String title = l.split(TITLE)[0];
                         String time = l.split(TIME)[1];
                         int minutes = "lightning".equalsIgnoreCase(time.trim()) ? 5 : Integer.parseInt(time.replaceAll("min", ""));
                         return new Talk(title, minutes);
-                    }).collect(Collectors.toCollection(LinkedList::new));
+                    }).collect(Collectors.toList());
 
             TalkScheduler talkScheduler = new TalkScheduler(talksPool);
             talkScheduler.schedule();
@@ -37,18 +38,18 @@ public class App {
 
     static class TalkScheduler {
 
-        LinkedList<Talk> talksPool;
+        List<Talk> talksPool;
         Session session1 = new Session("Tematica 1");
         Session session2 = new Session("Tematica 2");
 
-        public TalkScheduler(LinkedList<Talk> talksPool) {
+        public TalkScheduler(List<Talk> talksPool) {
             this.talksPool = talksPool;
         }
 
         public void schedule() {
             for (Talk t : talksPool) {
-                boolean addTalk = session1.addTalk(t);
-                if (!addTalk) {
+                boolean added = session1.addTalk(t);
+                if (!added) {
                     session2.addTalk(t);
                 }
             }
@@ -56,9 +57,9 @@ public class App {
 
         public void print() {
             System.out.println(session1.getTheme());
-            session1.getTalks().forEach(System.out::println);
+            session1.getOrderedTalks().forEach(System.out::println);
             System.out.println(session2.getTheme());
-            session2.getTalks().forEach(System.out::println);
+            session2.getOrderedTalks().forEach(System.out::println);
         }
 
     }
@@ -68,11 +69,11 @@ public class App {
         private String theme;
         private int durationAM = MOMENT.MORNING.getTotalMinutes();
         private int durationPM = MOMENT.AFTERNOON.getTotalMinutes();
-        private LinkedList<Talk> talks;
+        private SortedSet<Talk> orderedTalks;
 
         public Session(String theme) {
             this.theme = theme;
-            this.talks = new LinkedList<>();
+            this.orderedTalks = new TreeSet<>((t1, t2) -> t1.getStartTime().compareTo(t2.getStartTime()));
         }
 
         public String getTheme() {
@@ -81,10 +82,6 @@ public class App {
 
         public void setTheme(String theme) {
             this.theme = theme;
-        }
-
-        public List<Talk> getTalks() {
-            return talks;
         }
 
         public int getDurationAM() {
@@ -103,22 +100,28 @@ public class App {
             this.durationPM = durationPM;
         }
 
+        public SortedSet<Talk> getOrderedTalks() {
+            return orderedTalks;
+        }
+
         public boolean addTalk(Talk talk) {
             boolean added = false;
             if (talk != null) {
-                if (talks.isEmpty()) {
+                if (orderedTalks.isEmpty()) {
                     talk.setStartTime(LocalTime.of(9, 0));
                     talk.setMoment(MOMENT.MORNING);
                     durationAM -= talk.getDurationMinutes();
                 } else {
-                    Talk lastTalk = talks.getFirst();
+                    Talk lastTalk;
                     if (durationAM - talk.getDurationMinutes() >= 0) {
+                        lastTalk = orderedTalks.last();
                         LocalTime nextStartTime = lastTalk.getStartTime().plusMinutes(lastTalk.durationMinutes);
                         talk.setStartTime(nextStartTime);
                         talk.setMoment(MOMENT.MORNING);
                         durationAM -= talk.getDurationMinutes();
                     } else if (durationPM - talk.getDurationMinutes() >= 0) {
-                        //todo: verificar comienzo session tarde....
+                        orderedTalks.add(Talk.LUNCH);
+                        lastTalk = orderedTalks.last();
                         LocalTime nextStartTime = lastTalk.getStartTime().plusMinutes(lastTalk.durationMinutes);
                         talk.setStartTime(nextStartTime);
                         talk.setMoment(MOMENT.AFTERNOON);
@@ -127,7 +130,7 @@ public class App {
                         return false;
                     }
                 }
-                talks.push(talk);
+                orderedTalks.add(talk);
                 added = true;
             }
             return added;
