@@ -66,32 +66,24 @@ public class Session {
         }
 
         if (talk != null) {
-            if (orderedTalks.isEmpty()) {
-                talk.setStartTime(LocalTime.of(9, 0));
+            if (durationAM - talk.getDurationMinutes() >= 0) {
+                LocalTime nextSlot = Talk.LUNCH.getStartTime().minusMinutes(durationAM);
+                talk.setStartTime(nextSlot);
                 talk.setMoment(Moment.MORNING);
-                durationAM -= talk.getDurationMinutes();
+                durationAM -= talk.getDurationMinutes() + 5;
+            } else if (durationPM - talk.getDurationMinutes() >= 0) {
+                orderedTalks.add(Talk.LUNCH);
+                LocalTime nextSlot = Talk.NETWORKING_EVENT.getStartTime().minusMinutes(durationPM);
+                talk.setStartTime(nextSlot);
+                talk.setMoment(Moment.AFTERNOON);
+                durationPM -= talk.getDurationMinutes() + 5;
             } else {
-                Talk lastTalk;
-                if (durationAM - talk.getDurationMinutes() >= 0) {
-                    lastTalk = orderedTalks.last();
-                    LocalTime nextStartTime = lastTalk.getStartTime().plusMinutes(lastTalk.getDurationMinutes());
-                    talk.setStartTime(nextStartTime);
-                    talk.setMoment(Moment.MORNING);
-                    durationAM -= talk.getDurationMinutes();
-                } else if (durationPM - talk.getDurationMinutes() >= 0) {
-                    orderedTalks.add(Talk.LUNCH);
-                    lastTalk = orderedTalks.last();
-                    LocalTime nextStartTime = lastTalk.getStartTime().plusMinutes(lastTalk.getDurationMinutes());
-                    talk.setStartTime(nextStartTime);
-                    talk.setMoment(Moment.AFTERNOON);
-                    durationPM -= talk.getDurationMinutes();
-                } else {
-                    return false;
-                }
+                return false;
             }
             orderedTalks.add(talk);
             added = true;
         }
         return added;
     }
+
 }
